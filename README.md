@@ -2,7 +2,7 @@
 
 ### Um analisador de logs inteligente com o poder do Google Gemini para transformar dados técnicos em insights de segurança acionáveis.
 
-![GIF do Log Sentinel AI em Ação](URL_DO_SEU_GIF_AQUI)
+![GIF do Log Sentinel AI em Ação](https://github.com/Kaue-Lustosa/log-sentinel-ai/blob/main/demo/first_view.gif)
 
 ---
 
