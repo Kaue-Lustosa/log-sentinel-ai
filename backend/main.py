@@ -48,7 +48,7 @@ class FinalAnalysis(BaseModel):
 app = FastAPI(title="Log Sentinel AI API", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost", "http://localhost:3000"],
+    allow_origins=["https://log-sentinel-ai.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
