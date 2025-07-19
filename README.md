@@ -96,4 +96,4 @@ Siga os passos abaixo para configurar e executar o projeto em sua máquina local
 **Kauê Lustosa Morgado**
 
 * **LinkedIn:** https://www.linkedin.com/in/kauê-lustosa/
-* **GitHub:** [URL_DO_SEU_GITHUB]
+* **GitHub:** [https://github.com/Kaue-Lustosa]
