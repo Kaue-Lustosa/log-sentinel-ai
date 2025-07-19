@@ -7,18 +7,19 @@ interface OutputPanelProps {
   isLoading: boolean
   analysisResult: AnalysisResponse | null
   error: string | null
+  loadingMessage: string
 }
 
 /**
  * Componente OutputPanel - Área de exibição de resultados
  * Renderiza condicionalmente: estado inicial, loading ou resultados
  */
-export default function OutputPanel({ isLoading, analysisResult, error }: OutputPanelProps) {
+export default function OutputPanel({ isLoading, analysisResult, error, loadingMessage }: OutputPanelProps) {
   // Estado de carregamento
   if (isLoading) {
     return (
       <div className="lg:w-3/5">
-        <SkeletonLoader />
+        <SkeletonLoader loadingMessage={loadingMessage} />
       </div>
     )
   }

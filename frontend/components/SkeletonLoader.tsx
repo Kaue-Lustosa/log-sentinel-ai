@@ -2,7 +2,12 @@
  * Componente SkeletonLoader - Animação de carregamento
  * Simula o layout dos cards de resultado durante o loading
  */
-export default function SkeletonLoader() {
+
+interface SkeletonLoaderProps {
+  loadingMessage: string
+}
+
+export default function SkeletonLoader({ loadingMessage }: SkeletonLoaderProps) {
   return (
     <div className="space-y-6" role="status" aria-label="Carregando análise...">
       {/* Skeleton Card 1 */}
@@ -53,6 +58,11 @@ export default function SkeletonLoader() {
           <div className="w-full h-4 bg-gray-700 rounded animate-pulse" />
           <div className="w-5/6 h-4 bg-gray-700 rounded animate-pulse" />
         </div>
+      </div>
+
+      {/* Mensagem de carregamento dinâmica */}
+      <div className="text-center mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+        <p className="text-gray-300 text-sm">{loadingMessage}</p>
       </div>
     </div>
   )
