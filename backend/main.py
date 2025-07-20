@@ -19,7 +19,6 @@ try:
     api_key = os.environ["GOOGLE_API_KEY"]
     if not api_key:
         raise KeyError
-    # Usando o modelo Flash para ter um limite gratuito mais generoso
     model = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest", google_api_key=api_key, temperature=0)
 except KeyError:
     raise RuntimeError("Variável de ambiente GOOGLE_API_KEY não encontrada ou está vazia.")
@@ -46,11 +45,19 @@ class FinalAnalysis(BaseModel):
 
 # --- Configuração da Aplicação FastAPI ---
 app = FastAPI(title="Log Sentinel AI API", version="1.0.0")
+
+# Lista de URLs estáticas permitidas (para desenvolvimento local e o site principal)
+origins = [
+    "https://log-sentinel-ai.vercel.app",
+]
+vercel_preview_regex = r"https:\/\/log-sentinel-ai-.*-kauelustosas-projects\.vercel\.app"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://log-sentinel-ai.vercel.app"],
+    allow_origins=origins,
+    allow_origin_regex=vercel_preview_regex,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "HEAD", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -79,49 +86,12 @@ analysis_chain = analysis_prompt | model | partial_parser
 synthesis_chain = synthesis_prompt | model | final_parser
 
 # --- Endpoints da API ---
-
-# ALTERAÇÃO PRINCIPAL AQUI: Adicionado "HEAD" aos métodos permitidos.
 @app.api_route("/", methods=["GET", "HEAD"], tags=["Health Check"])
 def read_root():
-    """Endpoint de verificação de saúde, agora responde a GET e HEAD."""
-    # Para uma requisição HEAD, o FastAPI é inteligente e retorna apenas os headers.
     return {"status": "ok"}
 
 @app.post("/api/analyze", response_model=FinalAnalysis, tags=["Analysis"])
 async def analyze_log(request: LogRequest):
     log_text = request.log
     print(f"Recebido log de {len(log_text)} caracteres para análise.")
-    chunks = text_splitter.split_text(log_text)
-    print(f"Log dividido em {len(chunks)} chunk(s) pelo LangChain.")
-    
-    if len(chunks) == 1:
-        try:
-            partial_result = await analysis_chain.ainvoke({"log_chunk": chunks[0]})
-            final_data = FinalAnalysis(
-                translation=partial_result.translation,
-                risk_assessment=partial_result.risk_assessment,
-                justification="Análise de um único trecho de log.",
-                iocs=partial_result.iocs,
-                recommendation="Verificar o log completo para mais contexto ou fornecer mais dados."
-            )
-            return final_data
-        except Exception as e:
-            print(f"Erro ao analisar chunk único com LangChain: {e}")
-            raise HTTPException(status_code=500, detail="Falha ao analisar o log.")
-
-    partial_analysis_tasks = [analysis_chain.ainvoke({"log_chunk": chunk}) for chunk in chunks]
-    partial_analyses_results = await asyncio.gather(*partial_analysis_tasks, return_exceptions=True)
-    
-    successful_analyses = [res for res in partial_analyses_results if not isinstance(res, Exception)]
-    if not successful_analyses:
-        raise HTTPException(status_code=500, detail="Todas as análises de chunks falharam.")
-
-    partial_analyses_json_str = json.dumps([res.dict() for res in successful_analyses], indent=2)
-    
-    print("Iniciando a fase de síntese com LangChain...")
-    try:
-        final_result = await synthesis_chain.ainvoke({"partial_analyses": partial_analyses_json_str})
-        return final_result
-    except Exception as e:
-        print(f"Erro na fase de síntese com LangChain: {e}")
-        raise HTTPException(status_code=500, detail="Falha ao consolidar os resultados da análise.")
+    chunks = text_splitter.sp
