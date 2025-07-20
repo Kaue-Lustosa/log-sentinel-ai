@@ -136,3 +136,4 @@ async def analyze_log(request: LogRequest):
     except Exception as e:
         print(f"Erro na fase de síntese com LangChain: {e}")
         raise HTTPException(status_code=500, detail="Falha ao consolidar os resultados da análise.")
+    
