@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { MessageSquareText, ShieldAlert, Crosshair, ClipboardCheck, ClipboardCopy, Check } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { AnalysisResponse } from "@/app/page"
 import { motion } from "framer-motion"
@@ -19,19 +18,20 @@ interface ResultDisplayProps {
 export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
   const [copiedValue, setCopiedValue] = useState<string | null>(null)
 
-  const getRiskBadgeVariant = (riskLevel: string) => {
+  const getRiskBadgeClasses = (riskLevel: string) => {
     switch (riskLevel) {
       case "Crítico":
+        return "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-400 border-red-200 dark:border-red-500/30 border"
       case "Alto":
-        return "destructive"
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-400 border-orange-200 dark:border-orange-500/30 border"
       case "Médio":
-        return "default"
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/30 border"
       case "Baixo":
-        return "secondary"
+        return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-400 border-green-200 dark:border-green-500/30 border"
       case "Informativo":
-        return "outline"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 border"
       default:
-        return "outline"
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 border"
     }
   }
 
@@ -99,12 +99,11 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
             >
-              <Badge
-                variant={getRiskBadgeVariant(analysisResult.risk_assessment) as any}
-                className="text-sm font-medium"
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getRiskBadgeClasses(analysisResult.risk_assessment)}`}
               >
                 {analysisResult.risk_assessment}
-              </Badge>
+              </span>
             </motion.div>
             <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
               <strong>Justificativa:</strong> {analysisResult.justification}
