@@ -12,7 +12,7 @@ O **Log Sentinel AI** é uma aplicação web full-stack projetada para auxiliar 
 
 Este projeto foi desenvolvido como um case de estudo aprofundado na integração de Inteligência Artificial com Cibersegurança, demonstrando habilidades em desenvolvimento de software, arquitetura de sistemas e engenharia de prompts.
 
-**🔗 Teste a aplicação ao vivo:** [URL_DA_SUA_APLICAÇÃO_NA_VERCEL]
+**🔗 Teste a aplicação ao vivo:** https://log-sentinel-ai.vercel.app
 
 ---
 
@@ -96,4 +96,4 @@ Siga os passos abaixo para configurar e executar o projeto em sua máquina local
 **Kauê Lustosa Morgado**
 
 * **LinkedIn:** https://www.linkedin.com/in/kauê-lustosa/
-* **GitHub:** [https://github.com/Kaue-Lustosa]
+* **GitHub:** https://github.com/Kaue-Lustosa
