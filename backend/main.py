@@ -94,4 +94,45 @@ def read_root():
 async def analyze_log(request: LogRequest):
     log_text = request.log
     print(f"Recebido log de {len(log_text)} caracteres para análise.")
+
+    # Usa o text_splitter do LangChain
     chunks = text_splitter.split_text(log_text)
+    print(f"Log dividido em {len(chunks)} chunk(s) pelo LangChain.")
+    
+    # Se houver apenas um chunk, faz uma análise direta e a adapta para o formato final
+    if len(chunks) == 1:
+        try:
+            partial_result = await analysis_chain.ainvoke({"log_chunk": chunks[0]})
+            # Adapta a resposta parcial para o formato de resposta final
+            final_data = FinalAnalysis(
+                translation=partial_result.translation,
+                risk_assessment=partial_result.risk_assessment,
+                justification="Análise de um único trecho de log.",
+                iocs=partial_result.iocs,
+                recommendation="Verificar o log completo para mais contexto ou fornecer mais dados."
+            )
+            return final_data
+        except Exception as e:
+            print(f"Erro ao analisar chunk único com LangChain: {e}")
+            raise HTTPException(status_code=500, detail="Falha ao analisar o log.")
+
+    # Se houver múltiplos chunks, analisa todos em paralelo
+    partial_analysis_tasks = [analysis_chain.ainvoke({"log_chunk": chunk}) for chunk in chunks]
+    partial_analyses_results = await asyncio.gather(*partial_analysis_tasks, return_exceptions=True)
+    
+    # Filtra análises que podem ter falhado
+    successful_analyses = [res for res in partial_analyses_results if not isinstance(res, Exception)]
+    if not successful_analyses:
+        raise HTTPException(status_code=500, detail="Todas as análises de chunks falharam.")
+
+    # Converte os resultados para um formato JSON string para a síntese
+    partial_analyses_json_str = json.dumps([res.dict() for res in successful_analyses], indent=2)
+    
+    print("Iniciando a fase de síntese com LangChain...")
+    try:
+        # Executa a chain de síntese
+        final_result = await synthesis_chain.ainvoke({"partial_analyses": partial_analyses_json_str})
+        return final_result
+    except Exception as e:
+        print(f"Erro na fase de síntese com LangChain: {e}")
+        raise HTTPException(status_code=500, detail="Falha ao consolidar os resultados da análise.")
