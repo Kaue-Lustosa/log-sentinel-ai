@@ -88,7 +88,7 @@ export default function LogSentinelAI() {
   }, [isLoading])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Header />
       <main className="flex-1 flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
         <InputPanel
