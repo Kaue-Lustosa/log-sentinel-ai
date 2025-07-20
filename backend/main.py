@@ -94,4 +94,4 @@ def read_root():
 async def analyze_log(request: LogRequest):
     log_text = request.log
     print(f"Recebido log de {len(log_text)} caracteres para análise.")
-    chunks = text_splitter.sp
+    chunks = text_splitter.split_text(log_text)
