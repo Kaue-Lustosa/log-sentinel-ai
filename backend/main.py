@@ -71,7 +71,6 @@ analysis_prompt = PromptTemplate(
     partial_variables={"format_instructions": partial_parser.get_format_instructions()},
 )
 
-# PROMPT DE SÍNTESE MELHORADO
 synthesis_prompt = PromptTemplate(
     template="""Você é um Analista de Resposta a Incidentes Sênior. Você recebeu análises parciais de um log que descrevem um evento de segurança. Sua tarefa é consolidar essas análises em um relatório final, único e coeso. A recomendação deve ser um plano de ação prático e priorizado.
 
