@@ -1,19 +1,17 @@
 'use client';
 
+// SEUS IMPORTS AQUI (useState, useEffect, componentes, etc.)
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import dynamic from 'next/dynamic';
-
+import Header from "@/components/Header";
 import InputPanel from "@/components/InputPanel";
 import OutputPanel from "@/components/OutputPanel";
 
-const Header = dynamic(() => import('@/components/Header'), { ssr: false });
-
-interface Ioc {
+// SUAS INTERFACES AQUI
+export interface Ioc {
   type: string;
   value: string;
 }
-
 export interface AnalysisResponse {
   translation: string;
   risk_assessment: "Informativo" | "Baixo" | "Médio" | "Alto" | "Crítico";
@@ -23,6 +21,9 @@ export interface AnalysisResponse {
 }
 
 export default function LogSentinelAI() {
+  // SEU CÓDIGO E LÓGICA EXISTENTE AQUI
+  // (useState, handleAnalyze, useEffect, return JSX, etc.)
+  // Não precisa mudar nada dentro da função.
   const t = useTranslations();
   const locale = useLocale();
 
