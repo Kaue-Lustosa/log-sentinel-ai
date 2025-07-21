@@ -1,0 +1,39 @@
+{
+  "Header": {
+    "settings": "Settings",
+    "settingsDescription": "Adjust your application preferences here.",
+    "language": "Language"
+  },
+  "InputPanel": {
+    "title": "Paste Log for Analysis",
+    "analyzeButton": "Analyze",
+    "analyzingButton": "Analyzing...",
+    "clearButton": "Clear"
+  },
+  "OutputPanel": {
+    "initialTitle": "Awaiting Analysis",
+    "initialDescription": "Awaiting a log for analysis.",
+    "translationTitle": "Log Translation",
+    "riskTitle": "Risk Level",
+    "iocsTitle": "Indicators of Compromise (IoCs)",
+    "noIocs": "No IoCs found.",
+    "recommendationTitle": "Recommendation",
+    "errorTitle": "Analysis Error"
+  },
+  "Errors": {
+    "timeout": "The analysis server is taking too long to respond. Please try again in a moment.",
+    "connection": "Could not connect to the analysis service. Please check if the backend is running."
+  },
+  "Loading": {
+    "analyzing": "Analyzing with AI...",
+    "initializing": "The server may be initializing... This can take up to a minute."
+  },
+  "Languages": {
+    "portuguese": "Português (BR)",
+    "english": "English"
+  },
+  "Actions": {
+    "close": "Close",
+    "copy": "Copy"
+  }
+}

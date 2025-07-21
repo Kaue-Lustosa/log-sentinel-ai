@@ -1,0 +1,39 @@
+{
+  "Header": {
+    "settings": "Configurações",
+    "settingsDescription": "Ajuste suas preferências da aplicação aqui.",
+    "language": "Idioma"
+  },
+  "InputPanel": {
+    "title": "Cole o Log para Análise",
+    "analyzeButton": "Analisar",
+    "analyzingButton": "Analisando...",
+    "clearButton": "Limpar"
+  },
+  "OutputPanel": {
+    "initialTitle": "Aguardando Análise",
+    "initialDescription": "Aguardando um log para análise.",
+    "translationTitle": "Tradução do Log",
+    "riskTitle": "Nível de Risco",
+    "iocsTitle": "Indicadores de Comprometimento (IoCs)",
+    "noIocs": "Nenhum IoC encontrado.",
+    "recommendationTitle": "Recomendação",
+    "errorTitle": "Erro na Análise"
+  },
+  "Errors": {
+    "timeout": "O servidor de análise está demorando muito para responder. Tente novamente em alguns instantes.",
+    "connection": "Não foi possível conectar ao serviço de análise. Verifique se o backend está rodando."
+  },
+  "Loading": {
+    "analyzing": "Analisando com IA...",
+    "initializing": "O servidor pode estar inicializando... Isso pode levar até um minuto."
+  },
+  "Languages": {
+    "portuguese": "Português (BR)",
+    "english": "English"
+  },
+  "Actions": {
+    "close": "Fechar",
+    "copy": "Copiar"
+  }
+}

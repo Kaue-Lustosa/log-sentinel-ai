@@ -3,6 +3,7 @@
 import { ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useLocale } from "next-intl"
 import ThemeToggleButton from "./ThemeToggleButton"
 import SettingsDrawer from "./SettingsDrawer"
 
@@ -11,9 +12,11 @@ import SettingsDrawer from "./SettingsDrawer"
  * Exibe o título e ícone da aplicação Log Sentinel AI
  */
 export default function Header() {
+  const locale = useLocale()
+
   return (
     <header className="bg-white dark:bg-gray-800 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-2">
+      <Link href={`/${locale}`} className="flex items-center gap-2">
         <motion.div
           className="flex items-center gap-2 transition-colors duration-300 hover:text-blue-500 dark:hover:text-blue-400"
           whileHover={{ scale: 1.02 }}
@@ -25,8 +28,8 @@ export default function Header() {
       </Link>
 
       <div className="flex items-center gap-2">
-        <SettingsDrawer />
         <ThemeToggleButton />
+        <SettingsDrawer />
       </div>
     </header>
   )
