@@ -1,40 +1,114 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "../globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+'use client';
 
-const inter = Inter({ subsets: ["latin"] });
+import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import Header from "@/components/Header";
+import InputPanel from "@/components/InputPanel";
+import OutputPanel from "@/components/OutputPanel";
 
-export const metadata: Metadata = {
-  title: "Log Sentinel AI",
-  description: "Analisador de logs inteligente com IA",
-};
+interface Ioc {
+  type: string;
+  value: string;
+}
 
-export default async function RootLayout({
-  children,
-  params: {locale}
-}: Readonly<{
-  children: React.ReactNode;
-  params: {locale: string};
-}>) {
-  const messages = await getMessages();
+interface AnalysisResponse {
+  translation: string;
+  risk_assessment: "Informativo" | "Baixo" | "Médio" | "Alto" | "Crítico";
+  justification: string;
+  iocs: Ioc[];
+  recommendation: string;
+}
+
+
+export default function LogSentinelAI() {
+  const t = useTranslations();
+  const locale = useLocale();
+
+  const [logInput, setLogInput] = useState<string>("");
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 1. Inicialize o estado com uma string vazia ou um placeholder.
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
+
+  const handleAnalyze = async () => {
+    setIsLoading(true);
+    setAnalysisResult(null);
+    setError(null);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+    try {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/analyze`;
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          log: logInput,
+          language: locale,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Erro na API: ${response.statusText}`);
+      }
+
+      const data: AnalysisResponse = await response.json();
+      setAnalysisResult(data);
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      console.error("Falha ao buscar análise:", err);
+      if (err.name === "AbortError") {
+        setError(t("Errors.timeout"));
+      } else {
+        setError(t("Errors.connection"));
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClear = () => {
+    setLogInput("");
+    setAnalysisResult(null);
+    setError(null);
+  };
+
+  // 2. Use useEffect para definir a mensagem de carregamento quando 'isLoading' mudar.
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLoading) {
+      setLoadingMessage(t("Loading.analyzing")); // Mensagem inicial
+      timer = setTimeout(() => {
+        setLoadingMessage(t("Loading.initializing"));
+      }, 10000);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading, t]);
 
   return (
-    <html lang={locale}>
-      <body className={inter.className}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <Header />
+      <main className="flex-1 flex flex-col lg:flex-row gap-8 p-4 lg:p-8">
+        <InputPanel
+          logInput={logInput}
+          setLogInput={setLogInput}
+          handleAnalyze={handleAnalyze}
+          handleClear={handleClear}
+          isLoading={isLoading}
+        />
+        <OutputPanel
+          isLoading={isLoading}
+          analysisResult={analysisResult}
+          error={error}
+          loadingMessage={loadingMessage}
+        />
+      </main>
+    </div>
   );
 }
