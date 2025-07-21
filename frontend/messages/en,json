@@ -26,7 +26,7 @@
   },
   "Loading": {
     "analyzing": "Analyzing with AI...",
-    "initializing": "The server may be initializing... This can take up to a minute."
+    "initializing": "The server might be initializing... This can take up to a minute."
   },
   "Languages": {
     "portuguese": "Português (BR)",
