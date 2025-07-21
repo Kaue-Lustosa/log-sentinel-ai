@@ -4,7 +4,6 @@ import { useState } from "react"
 import { MessageSquareText, ShieldAlert, Crosshair, ClipboardCheck, ClipboardCopy, Check } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useTranslations } from "next-intl"
 import type { AnalysisResponse } from "@/app/page"
 import { motion } from "framer-motion"
 
@@ -17,7 +16,6 @@ interface ResultDisplayProps {
  * Renderiza 4 cards: Tradução, Risco, IoCs e Recomendação
  */
 export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
-  const t = useTranslations()
   const [copiedValue, setCopiedValue] = useState<string | null>(null)
 
   const getRiskBadgeClasses = (riskLevel: string) => {
@@ -78,7 +76,7 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
             <MessageSquareText className="text-blue-500 dark:text-blue-400" size={20} />
-            {t("OutputPanel.translationTitle")}
+            Tradução do Log
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -91,7 +89,7 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
             <ShieldAlert className="text-orange-500 dark:text-orange-400" size={20} />
-            {t("OutputPanel.riskTitle")}
+            Nível de Risco
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -119,12 +117,12 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
             <Crosshair className="text-red-500 dark:text-red-400" size={20} />
-            {t("OutputPanel.iocsTitle")}
+            Indicadores de Comprometimento (IoCs)
           </CardTitle>
         </CardHeader>
         <CardContent>
           {analysisResult.iocs.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400">{t("OutputPanel.noIocs")}</p>
+            <p className="text-gray-500 dark:text-gray-400">Nenhum IoC encontrado.</p>
           ) : (
             <motion.div className="space-y-2" variants={containerVariants} initial="hidden" animate="visible">
               {analysisResult.iocs.map((ioc, index) => (
@@ -143,7 +141,7 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
                     size="sm"
                     onClick={() => copyToClipboard(ioc.value)}
                     className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 h-8 w-8 p-0"
-                    aria-label={`${t("Actions.copy")} ${ioc.type}: ${ioc.value}`}
+                    aria-label={`Copiar ${ioc.type}: ${ioc.value}`}
                   >
                     {copiedValue === ioc.value ? (
                       <Check size={16} className="text-green-500 dark:text-green-400" />
@@ -163,7 +161,7 @@ export default function ResultDisplay({ analysisResult }: ResultDisplayProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-gray-900 dark:text-white">
             <ClipboardCheck className="text-green-500 dark:text-green-400" size={20} />
-            {t("OutputPanel.recommendationTitle")}
+            Recomendação
           </CardTitle>
         </CardHeader>
         <CardContent>
