@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Menu } from "lucide-react"
+import { Menu, TriangleAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Drawer,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/drawer"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 /**
  * Componente SettingsDrawer - Menu de configurações deslizante
@@ -45,6 +46,14 @@ export default function SettingsDrawer() {
           </DrawerHeader>
 
           <div className="p-4 pb-0">
+            <Alert className="mb-4">
+              <TriangleAlert className="h-4 w-4" />
+              <AlertTitle>Funcionalidade em Beta</AlertTitle>
+              <AlertDescription>
+                A troca de idioma ainda está em desenvolvimento e será implementada em breve.
+              </AlertDescription>
+            </Alert>
+
             <div className="space-y-4">
               {/* Seção de Idioma */}
               <div>

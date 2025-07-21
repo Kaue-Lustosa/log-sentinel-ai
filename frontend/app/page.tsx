@@ -105,6 +105,10 @@ export default function LogSentinelAI() {
           loadingMessage={loadingMessage}
         />
       </main>
+      <footer className="text-center text-xs text-gray-500 dark:text-gray-400 py-8 px-4">
+        Precisa decifrar um log de erro ou investigar uma atividade suspeita? O Log Sentinel AI usa o poder da IA para
+        traduzir dados técnicos em insights acionáveis.
+      </footer>
     </div>
   )
 }

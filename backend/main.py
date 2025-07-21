@@ -47,6 +47,7 @@ class FinalAnalysis(BaseModel):
 app = FastAPI(title="Log Sentinel AI API", version="1.0.0")
 
 origins = [
+    "http://localhost", "http://localhost:3000",
     "https://log-sentinel-ai.vercel.app",
 ]
 vercel_preview_regex = r"https:\/\/log-sentinel-ai-.*-kauelustosas-projects\.vercel\.app"
@@ -71,18 +72,19 @@ analysis_prompt = PromptTemplate(
     partial_variables={"format_instructions": partial_parser.get_format_instructions()},
 )
 
+# --- PROMPT DE SÍNTESE APRIMORADO ---
 synthesis_prompt = PromptTemplate(
-    template="""Você é um Analista de Resposta a Incidentes Sênior. Você recebeu análises parciais de um log que descrevem um evento de segurança. Sua tarefa é consolidar essas análises em um relatório final, único e coeso. A recomendação deve ser um plano de ação prático e priorizado.
+    template="""Você é um Analista Sênior de Operações de Segurança (SecOps) e Forense Digital. Sua tarefa é analisar logs para identificar a causa raiz de um problema, que pode ser um incidente de segurança, um erro de configuração, ou um problema de software. Sua análise final deve ser coesa e não mencionar que o log foi dividido em partes.
 
 ### ANÁLISES PARCIAIS ###
 {partial_analyses}
 
 ### TAREFAS FINAIS ###
-1.  **Tradução Final (`translation`):** Crie uma narrativa coesa que resuma a história completa do ataque, passo a passo.
-2.  **Avaliação de Risco Geral (`risk_assessment`):** Determine um único nível de risco geral. Escolha o nível de risco mais alto entre os apresentados.
-3.  **Justificativa Final (`justification`):** Explique o porquê do risco geral, citando os eventos mais críticos (ex: acesso root, instalação de malware).
-4.  **Lista de IoCs Consolidada (`iocs`):** Compile uma lista única de todos os IoCs, removendo duplicatas.
-5.  **Plano de Ação (`recommendation`):** Forneça uma recomendação em formato de plano de ação com passos numerados. Comece com contenção, depois investigação e erradicação. Seja específico. Exemplo: "1. Contenção: Isole a máquina 'myserver' da rede imediatamente. 2. Investigação: Analise o conteúdo dos arquivos 'shell.sh' e 'rootkit.tgz' em um ambiente seguro. 3. Erradicação: Remova a entrada maliciosa do crontab."
+1.  **Tradução Final (`translation`):** Crie uma narrativa coesa que resuma a história completa do evento.
+2.  **Avaliação de Risco Geral (`risk_assessment`):** Determine um único nível de risco geral. Se for um ataque claro, o risco é 'Crítico' ou 'Alto'. Se for um erro de build ou configuração, o risco é 'Médio' ou 'Baixo'. Se for um log informativo, o risco é 'Informativo'.
+3.  **Justificativa Final (`justification`):** Explique o porquê do risco, identificando o tipo de problema (ex: "Erro de configuração no build", "Tentativa de acesso não autorizado").
+4.  **Lista de IoCs Consolidada (`iocs`):** Compile uma lista única de todos os IoCs, removendo duplicatas. Se for um erro de software, os IoCs podem ser nomes de arquivos ou módulos problemáticos.
+5.  **Plano de Ação (`recommendation`):** Forneça uma recomendação em formato de plano de ação com passos numerados. A recomendação deve ser específica para o problema encontrado. Se for um erro de build, foque em depuração. Se for um ataque, foque em contenção, investigação e erradicação.
 
 {format_instructions}
 """,
@@ -94,6 +96,7 @@ analysis_chain = analysis_prompt | model | partial_parser
 synthesis_chain = synthesis_prompt | model | final_parser
 
 # --- Endpoints da API ---
+# ... (O resto do seu código, a partir de @app.api_route, continua o mesmo)
 @app.api_route("/", methods=["GET", "HEAD"], tags=["Health Check"])
 def read_root():
     return {"status": "ok"}
@@ -112,7 +115,6 @@ async def analyze_log(request: LogRequest):
     if not successful_analyses:
         raise HTTPException(status_code=500, detail="Todas as análises de chunks falharam.")
 
-    # Se houver apenas uma análise parcial, crie um wrapper para que ela possa ser sintetizada
     if len(successful_analyses) == 1:
         analysis_for_synthesis = [{"analysis": successful_analyses[0].dict()}]
     else:
