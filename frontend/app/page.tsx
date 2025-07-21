@@ -1,12 +1,9 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
 import Header from "@/components/Header";
 import InputPanel from "@/components/InputPanel";
 import OutputPanel from "@/components/OutputPanel";
-
-export const dynamic = 'force-dynamic';
 
 export interface Ioc {
   type: string;
@@ -21,14 +18,11 @@ export interface AnalysisResponse {
 }
 
 export default function LogSentinelAI() {
-  const t = useTranslations();
-  const locale = useLocale();
-
   const [logInput, setLogInput] = useState<string>("");
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingMessage, setLoadingMessage] = useState<string>("");
+  const [loadingMessage, setLoadingMessage] = useState<string>("Analisando com IA...");
 
   const handleAnalyze = async () => {
     setIsLoading(true);
@@ -43,10 +37,7 @@ export default function LogSentinelAI() {
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          log: logInput,
-          language: locale,
-        }),
+        body: JSON.stringify({ log: logInput, language: 'pt-BR' }), // Envia pt-BR por padrão
         signal: controller.signal,
       });
 
@@ -62,9 +53,9 @@ export default function LogSentinelAI() {
       clearTimeout(timeoutId);
       console.error("Falha ao buscar análise:", err);
       if (err.name === "AbortError") {
-        setError(t("Errors.timeout"));
+        setError("O servidor de análise está demorando muito para responder. Tente novamente.");
       } else {
-        setError(t("Errors.connection"));
+        setError("Não foi possível conectar ao serviço de análise. Verifique se o backend está rodando.");
       }
     } finally {
       setIsLoading(false);
@@ -80,13 +71,13 @@ export default function LogSentinelAI() {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isLoading) {
-      setLoadingMessage(t("Loading.analyzing"));
+      setLoadingMessage("Analisando com IA...");
       timer = setTimeout(() => {
-        setLoadingMessage(t("Loading.initializing"));
+        setLoadingMessage("O servidor pode estar inicializando... Isso pode levar até um minuto.");
       }, 10000);
     }
     return () => clearTimeout(timer);
-  }, [isLoading, t]);
+  }, [isLoading]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">

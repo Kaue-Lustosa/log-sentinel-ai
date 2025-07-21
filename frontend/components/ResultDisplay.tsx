@@ -5,7 +5,7 @@ import { MessageSquareText, ShieldAlert, Crosshair, ClipboardCheck, ClipboardCop
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
-import type { AnalysisResponse } from "@/app/[locale]/page"
+import type { AnalysisResponse } from "@/app/page"
 import { motion } from "framer-motion"
 
 interface ResultDisplayProps {

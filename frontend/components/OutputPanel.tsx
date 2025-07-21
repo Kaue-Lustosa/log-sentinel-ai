@@ -4,7 +4,7 @@ import { Search, ShieldAlert } from "lucide-react"
 import { useTranslations } from "next-intl"
 import ResultDisplay from "./ResultDisplay"
 import SkeletonLoader from "./SkeletonLoader"
-import type { AnalysisResponse } from "@/app/[locale]/page"
+import type { AnalysisResponse } from "@/app/page"
 
 interface OutputPanelProps {
   isLoading: boolean
