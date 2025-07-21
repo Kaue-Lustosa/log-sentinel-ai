@@ -1,12 +1,13 @@
-/**
- * Componente SkeletonLoader - Animação de carregamento
- * Simula o layout dos cards de resultado durante o loading
- */
+"use client"
 
 interface SkeletonLoaderProps {
   loadingMessage: string
 }
 
+/**
+ * Componente SkeletonLoader - Animação de carregamento
+ * Simula o layout dos cards de resultado durante o loading
+ */
 export default function SkeletonLoader({ loadingMessage }: SkeletonLoaderProps) {
   return (
     <div className="space-y-6" role="status" aria-label="Carregando análise...">

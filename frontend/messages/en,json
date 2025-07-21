@@ -1,5 +1,6 @@
 {
   "Header": {
+    "title": "Log Sentinel AI",
     "settings": "Settings",
     "settingsDescription": "Adjust your application preferences here.",
     "language": "Language"
@@ -11,13 +12,13 @@
     "clearButton": "Clear"
   },
   "OutputPanel": {
-    "initialTitle": "Awaiting Analysis",
-    "initialDescription": "Awaiting a log for analysis.",
+    "initialTitle": "Awaiting log for analysis",
+    "initialDescription": "Paste a system log in the area to the left and click 'Analyze' to see the AI magic in action.",
     "translationTitle": "Log Translation",
     "riskTitle": "Risk Level",
     "iocsTitle": "Indicators of Compromise (IoCs)",
     "noIocs": "No IoCs found.",
-    "recommendationTitle": "Recommendation",
+    "recommendationTitle": "Recommended Action",
     "errorTitle": "Analysis Error"
   },
   "Errors": {
