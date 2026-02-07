@@ -19,7 +19,7 @@ try:
     api_key = os.environ["GOOGLE_API_KEY"]
     if not api_key:
         raise KeyError
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key, temperature=0.1)
+    model = ChatGoogleGenerativeAI(model="gemini-1.5-flash-001", google_api_key=api_key, temperature=0.1)
 except KeyError:
     raise RuntimeError("Variável de ambiente GOOGLE_API_KEY não encontrada ou está vazia.")
 
