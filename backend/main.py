@@ -63,7 +63,7 @@ class FinalAnalysis(BaseModel):
     risk_assessment: Literal["Informativo", "Baixo", "Médio", "Alto", "Crítico"] = Field(description="Nível de risco geral para o evento completo.")
     justification: str = Field(description="Justificativa para a avaliação de risco geral.")
     iocs: List[Ioc] = Field(description="Lista única de todos os IoCs encontrados, sem duplicatas.")
-    recommendation: str = Field(description="Plano de ação passo a passo claro e acionável.")
+    recommendation: List[str] = Field(description="Lista de ações recomendadas. Cada item da lista deve ser um passo claro e separado.")
 
 # --- Configuração da Aplicação FastAPI ---
 app = FastAPI(title="Log Sentinel AI API", version="1.0.0")
