@@ -39,7 +39,7 @@ except Exception as e:
 
 # --- CONFIGURAÇÃO DA IA ---
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash",
     google_api_key=GOOGLE_API_KEY,
     transport="rest", 
     temperature=0.2
