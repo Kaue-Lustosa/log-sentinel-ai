@@ -1,44 +1,47 @@
 import os
 import json
 import asyncio
+import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Literal
 from dotenv import load_dotenv
-import google.generativeai as genai
 
-# --- Importações do LangChain ---
+# --- Google & LangChain ---
+import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document 
 
-# --- Carregar variáveis e configurar a IA ---
+# --- Carregar variáveis ---
 load_dotenv()
-try:
-    api_key = os.environ["GOOGLE_API_KEY"]
-    if not api_key:
-        raise KeyError
-    model = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=api_key, temperature=0.1)
-except KeyError:
-    raise RuntimeError("Variável de ambiente GOOGLE_API_KEY não encontrada ou está vazia.")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
+if not GOOGLE_API_KEY:
+    raise RuntimeError("Variável de ambiente GOOGLE_API_KEY não encontrada.")
+
+# --- DIAGNÓSTICO INICIAL (Para ver no Log do Render) ---
 try:
     print("--- INICIANDO DIAGNÓSTICO DO GOOGLE GENAI ---")
-    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    genai.configure(api_key=GOOGLE_API_KEY)
+    # Lista modelos para garantir que a chave funciona e vê o que está disponível
+    available_models = []
     for m in genai.list_models():
         if 'generateContent' in m.supported_generation_methods:
+            available_models.append(m.name)
             print(f"Modelo Disponível: {m.name}")
     print("--- FIM DO DIAGNÓSTICO ---")
 except Exception as e:
     print(f"ERRO CRÍTICO AO LISTAR MODELOS: {e}")
 
-# --- Definição do LLM com Correção de Transporte ---
+# --- CONFIGURAÇÃO DA IA ---
 llm = ChatGoogleGenerativeAI(
-    model="gemini-pro",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
-    transport="rest",
+    model="gemini-1.5-flash",
+    google_api_key=GOOGLE_API_KEY,
+    transport="rest", 
     temperature=0.2
 )
 
@@ -70,10 +73,14 @@ origins = [
     "https://log-sentinel-ai.vercel.app",
 ]
 vercel_preview_regex = r"https:\/\/log-sentinel-ai-.*-kauelustosas-projects\.vercel\.app"
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, allow_origin_regex=vercel_preview_regex,
-    allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+    allow_origins=origins, 
+    allow_origin_regex=vercel_preview_regex,
+    allow_credentials=True, 
+    allow_methods=["*"], 
+    allow_headers=["*"],
 )
 
 # --- Constantes e Text Splitter ---
@@ -81,7 +88,7 @@ CHUNK_SIZE = 4000
 CHUNK_OVERLAP = 500
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
 
-# --- Configuração dos Parsers e Chains do LangChain ---
+# --- Configuração dos Parsers e Chains ---
 partial_parser = PydanticOutputParser(pydantic_object=PartialAnalysis)
 final_parser = PydanticOutputParser(pydantic_object=FinalAnalysis)
 
@@ -91,10 +98,9 @@ analysis_prompt = PromptTemplate(
     partial_variables={"format_instructions": partial_parser.get_format_instructions()},
 )
 
-# --- PROMPT DE SÍNTESE APRIMORADO ---
 synthesis_prompt = PromptTemplate(
     template="""Você é um Analista Sênior de Operações de Segurança (SecOps) e Forense Digital. Sua tarefa é analisar logs para identificar a causa raiz de um problema, que pode ser um incidente de segurança, um erro de configuração, ou um problema de software. Sua análise final deve ser coesa e não mencionar que o log foi dividido em partes.
-
+    
 ### ANÁLISES PARCIAIS ###
 {partial_analyses}
 
@@ -111,40 +117,57 @@ synthesis_prompt = PromptTemplate(
     partial_variables={"format_instructions": final_parser.get_format_instructions()},
 )
 
-analysis_chain = analysis_prompt | model | partial_parser
-synthesis_chain = synthesis_prompt | model | final_parser
+analysis_chain = analysis_prompt | llm | partial_parser
+synthesis_chain = synthesis_prompt | llm | final_parser
 
-# --- Endpoints da API ---
-# ... (O resto do seu código, a partir de @app.api_route, continua o mesmo)
+# --- Endpoints ---
 @app.api_route("/", methods=["GET", "HEAD"], tags=["Health Check"])
 def read_root():
     return {"status": "ok"}
 
 @app.post("/api/analyze", response_model=FinalAnalysis, tags=["Analysis"])
 async def analyze_log(request: LogRequest):
-    log_text = request.log
-    print(f"Recebido log de {len(log_text)} caracteres para análise.")
-    chunks = text_splitter.split_text(log_text)
-    print(f"Log dividido em {len(chunks)} chunk(s) pelo LangChain.")
+    print(f"Recebido log de {len(request.log)} caracteres para análise.")
     
-    partial_analysis_tasks = [analysis_chain.ainvoke({"log_chunk": chunk}) for chunk in chunks]
-    partial_analyses_results = await asyncio.gather(*partial_analysis_tasks, return_exceptions=True)
-    
-    successful_analyses = [res for res in partial_analyses_results if not isinstance(res, Exception)]
-    if not successful_analyses:
-        raise HTTPException(status_code=500, detail="Todas as análises de chunks falharam.")
-
-    if len(successful_analyses) == 1:
-        analysis_for_synthesis = [{"analysis": successful_analyses[0].dict()}]
-    else:
-        analysis_for_synthesis = [res.dict() for res in successful_analyses]
-
-    partial_analyses_json_str = json.dumps(analysis_for_synthesis, indent=2)
-    
-    print("Iniciando a fase de síntese com LangChain...")
     try:
+        # 1. Divisão
+        chunks = text_splitter.split_text(request.log)
+        print(f"Log dividido em {len(chunks)} chunk(s) pelo LangChain.")
+        
+        # 2. Análise Parcial (Executa em paralelo)
+        print("Iniciando análises parciais...")
+        partial_analysis_tasks = [analysis_chain.ainvoke({"log_chunk": chunk}) for chunk in chunks]
+        partial_analyses_results = await asyncio.gather(*partial_analysis_tasks, return_exceptions=True)
+        
+        # Filtra sucessos
+        successful_analyses = [res for res in partial_analyses_results if not isinstance(res, Exception)]
+        
+        # Loga erros individuais se houver
+        for res in partial_analyses_results:
+            if isinstance(res, Exception):
+                print(f"ERRO EM UM CHUNK: {res}")
+
+        if not successful_analyses:
+            raise HTTPException(status_code=500, detail="Todas as análises de chunks falharam. Verifique os logs do servidor.")
+
+        # Prepara para síntese
+        if len(successful_analyses) == 1:
+            analysis_for_synthesis = [{"analysis": successful_analyses[0].dict()}]
+        else:
+            analysis_for_synthesis = [res.dict() for res in successful_analyses]
+
+        partial_analyses_json_str = json.dumps(analysis_for_synthesis, indent=2, default=str)
+        
+        # 3. Síntese Final
+        print("Iniciando a fase de síntese...")
         final_result = await synthesis_chain.ainvoke({"partial_analyses": partial_analyses_json_str})
+        
+        print("Análise concluída com sucesso!")
         return final_result
+
     except Exception as e:
-        print(f"Erro na fase de síntese com LangChain: {e}")
-        raise HTTPException(status_code=500, detail="Falha ao consolidar os resultados da análise.")
+        print("========================================")
+        print("ERRO FATAL NO PROCESSAMENTO:")
+        print(traceback.format_exc())
+        print("========================================")
+        raise HTTPException(status_code=500, detail=f"Erro interno no processamento: {str(e)}")
