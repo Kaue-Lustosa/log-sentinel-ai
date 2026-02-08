@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Literal
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # --- Importações do LangChain ---
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -22,6 +23,24 @@ try:
     model = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=api_key, temperature=0.1)
 except KeyError:
     raise RuntimeError("Variável de ambiente GOOGLE_API_KEY não encontrada ou está vazia.")
+
+try:
+    print("--- INICIANDO DIAGNÓSTICO DO GOOGLE GENAI ---")
+    genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            print(f"Modelo Disponível: {m.name}")
+    print("--- FIM DO DIAGNÓSTICO ---")
+except Exception as e:
+    print(f"ERRO CRÍTICO AO LISTAR MODELOS: {e}")
+
+# --- Definição do LLM com Correção de Transporte ---
+llm = ChatGoogleGenerativeAI(
+    model="gemini-pro",
+    google_api_key=os.getenv("GOOGLE_API_KEY"),
+    transport="rest",
+    temperature=0.2
+)
 
 # --- Modelos de Dados (Pydantic) ---
 class LogRequest(BaseModel):
