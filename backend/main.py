@@ -105,11 +105,11 @@ synthesis_prompt = PromptTemplate(
 {partial_analyses}
 
 ### TAREFAS FINAIS ###
-1.  **Tradução Final (`translation`):** Crie uma narrativa coesa que resuma a história completa do evento.
-2.  **Avaliação de Risco Geral (`risk_assessment`):** Determine um único nível de risco geral. Se for um ataque claro, o risco é 'Crítico' ou 'Alto'. Se for um erro de build ou configuração, o risco é 'Médio' ou 'Baixo'. Se for um log informativo, o risco é 'Informativo'.
-3.  **Justificativa Final (`justification`):** Explique o porquê do risco, identificando o tipo de problema (ex: "Erro de configuração no build", "Tentativa de acesso não autorizado").
-4.  **Lista de IoCs Consolidada (`iocs`):** Compile uma lista única de todos os IoCs, removendo duplicatas. Se for um erro de software, os IoCs podem ser nomes de arquivos ou módulos problemáticos.
-5.  **Plano de Ação (`recommendation`):** Forneça uma recomendação em formato de plano de ação com passos numerados. A recomendação deve ser específica para o problema encontrado. Se for um erro de build, foque em depuração. Se for um ataque, foque em contenção, investigação e erradicação.
+1.  **Tradução Final (`translation`):** ...
+2.  **Avaliação de Risco Geral (`risk_assessment`):** ...
+3.  **Justificativa Final (`justification`):** ...
+4.  **Lista de IoCs Consolidada (`iocs`):** ...
+5.  **Plano de Ação (`recommendation`):** Retorne uma LISTA DE STRINGS. Cada string deve ser um passo acionável e direto. NÃO numere as strings dentro do texto (ex: não faça "1. Fazer isso"), pois o frontend fará a numeração. Apenas entregue o texto da ação.
 
 {format_instructions}
 """,
